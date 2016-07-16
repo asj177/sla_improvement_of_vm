@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+
+<style>
+<
+meta charset ="utf-8"> <meta name ="viewport" content
+	="width=device-width, initial-scale =1.0 "> <title>VM Creation </title><!--Bootstrap CSS -->
+	<link href ="css/bootstrap.min.css " rel ="stylesheet"><!--bootstrap theme -->
+	<link href ="css/bootstrap-theme.css " rel ="stylesheet"><!--external css--><!--Custom styles -->
+	<link href ="css/style.css " rel ="stylesheet"> <link href
+	="css/style-responsive.css " rel ="stylesheet" /> <link href
+	="css/jquery-ui-1.10.4.min.css " rel ="stylesheet"> < link type ="text
+	/css" rel ="stylesheet " href ="simplePagination.css "/> <link type ="text
+	/css" rel ="stylesheet " href ="bootstrap-3.3.5-dist /css/bootstrap.min.css 
+	"/> <script src ="http: //d3js.org /d3.v3.min.js
+	 "> </script> <script src ="//cdnjs.cloudflare.com /ajax/libs/jquery/1.11.1-rc2
+	/jquery.min.js "> </script> <script src ="http: //labratrevenge.com
+	/d3-tip/javascripts/d3.tip.v0.6.3.js "> </script> <script src = "http:
+	//mostapharoudsari.github.io /Honeybee/pc_source_files/d3/d3.parcoords.js
+	 "> </script> <script src ="jquery.js "> </script> <script src
+	 ="bootstrap-3.3.5-dist /js/bootstrap.min.js "> </script> <script src
+	 ="jquery.simplePagination.js "> </script> <script src ="jquery.panzoom.js
+	 "> </script>.ui-tabs.ui-tabs-vertical {
+	padding: 0;
+	width: 42em;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-widget-header {
+	border: none;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav {
+	float: left;
+	width: 10em;
+	background: #CCC;
+	border-radius: 4px 0 0 4px;
+	border-right: 1px solid gray;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li {
+	clear: left;
+	width: 100%;
+	margin: 0.2em 0;
+	border: 1px solid gray;
+	border-width: 1px 0 1px 1px;
+	border-radius: 4px 0 0 4px;
+	overflow: hidden;
+	position: relative;
+	right: -2px;
+	z-index: 2;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li a {
+	display: block;
+	width: 100%;
+	padding: 0.6em 1em;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li a:hover {
+	cursor: pointer;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+	margin-bottom: 0.2em;
+	padding-bottom: 0;
+	border-right: 1px solid white;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li:last-child {
+	margin-bottom: 10px;
+}
+
+.ui-tabs.ui-tabs-vertical .ui-tabs-panel {
+	float: left;
+	width: 28em;
+	border-left: 1px solid gray;
+	border-radius: 0;
+	position: relative;
+	left: -1px;
+}
+</style>
+
+<script>
+$( document ).ready(function() {
+	  // Handler for .ready() called.
+	$('#tabs')
+    .tabs()
+    .addClass('ui-tabs-vertical ui-helper-clearfix');
+	  
+	  
+	
+	});
+
+
+</script>
+</head>
+<body>
+	<div id="tabs">
+		<ul>
+			<li><a href="#create">Create VM</a></li>
+			<li><a href="#vmlist">List VM </a></li>
+			<li><a href="#cacheDetails">Cache Details</a></li>
+			<li><a href="#IOstats">IO Stats</a></li>
+			<li><a href="#fioCompare">FIO Compare</a></li>
+
+			<li><a href="#hostDetails">Host Details</a></li>
+		</ul>
+
+
+		<div id="create">
+			<table>
+
+				<tr>
+
+					<td>VmName</td>
+					<td><input type="text" id="vmName" name="vmName"></input><br />
+					</td>
+				</tr>
+
+
+				<tr>
+
+					<td>OS</td>
+					<td><select id="os">
+							<option value="ubuntu">Ubuntu</option>
+							<option value="centos">Centos</option>
+					</select></td>
+				</tr>
+
+
+				<tr>
+
+					<td>VCPU</td>
+					<td><input type="text" id="vcpu" name="vcpu"></input><br /></td>
+				</tr>
+
+				<tr>
+
+					<td>Memory</td>
+					<td><input type="text" id="memory" name="memory"></input><br />
+					</td>
+				</tr>
+			</table>
+
+		</div>
+		<div id="vmlist">VMList</div>
+		<div id="cacheDetails">CacheDetails</div>
+		<div id="IOstats">IOStats</div>
+
+		<div id="fioCompare">
+
+			<h1>
+				Data with SSD Cache Enabled
+				<h1>
+
+					<div id="graphdiv2" style="height: 300px;"></div>
+
+					<h1>
+						Data with SSD Cache Disbaled
+						<h1>
+
+							<div id="graphdiv1" style="height: 300px;"></div>
+							<script type="text/javascript">
+var j=0;
+while(j!=2){
+
+var endpoint="";
+
+if(j==0){
+endpoint="http://localhost:9200/fio_benchmark/fio_benchmark/_search";
+
+}else{
+endpoint="http://localhost:9200/fio_benchmark_vm_no_cache/fio_benchmark_vm_no_cache/_search";
+
+}
+  var client = new XMLHttpRequest();
+    
+    var endPoint=endpoint;
+    var dataToDisplay=[]
+    var esDataJson;
+   
+     client.open("GET", endPoint, false);
+     client.send();
+     esDataJson=JSON.parse(client.responseText);
+
+      var hits=esDataJson.hits.hits;
+
+         
+      for(var i=0;i<hits.length;i++){
+
+         var es=hits[i]._source;
+        
+
+  	
+
+        
+	var data=[];
+      
+         //data.push(new Date(es.timestamp));
+         data.push(new Date(es["@timestamp"]));
+         data.push(es.iops);
+         dataToDisplay.push(data);
+    }
+
+
+
+
+//Here we sort the data to display
+dataToDisplay.sort(function(a, b){
+    var keyA = new Date(a[0]),
+        keyB = new Date(b[0]);
+    // Compare the 2 dates
+    if(keyA < keyB) return -1;
+    if(keyA > keyB) return 1;
+    return 0;
+});
+
+
+var div="";
+
+if(j==0){
+div="graphdiv2";
+}else{
+
+div="graphdiv1";
+}
+var timestart=null;
+var timeend=null;
+  g2 = new Dygraph(
+    document.getElementById(div),
+    dataToDisplay, // path to CSV file
+     {
+       labels: [ "Date", "iops" ],
+       zoomCallback: function(minX, maxX, yRanges) {
+   // console.log("Zoomed to [", minX, ", ", maxX, "]");
+     this.timestart=new Date(minX);
+     this.timeend=new Date(maxX);
+//console.log("min x is "+this.timestart+"max x is "+this.timeend);
+var time_start=this.timestart.getFullYear()+"/"+(this.timestart.getMonth()+1)+"/"+this.timestart.getDate()+" "+
+               this.timestart.getHours()+":"+this.timestart.getMinutes()+":"+this.timestart.getSeconds();
+
+
+var time_end=this.timeend.getFullYear()+"/"+(this.timeend.getMonth()+1)+"/"+this.timeend.getDate()+" "+
+               this.timeend.getHours()+":"+this.timeend.getMinutes()+":"+this.timeend.getSeconds();
+//console.log(time_start);
+
+var inputText="time_start=="+time_start+" and time_end=="+time_end;
+
+$("#selectedIP").val(inputText);  
+}
+      
+     }   // options
+  );
+
+g2.ready(function() {
+  console.log("Data loaded. x-axis range is:", g2.xAxisRange());
+});
+j++;
+}
+
+</script>
+		</div>
+
+
+
+
+		<div id="hostDetails">HostDetails</div>
+
+	</div>
+</body>
+</html>
