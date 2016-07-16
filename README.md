@@ -9,11 +9,17 @@ This is the scheduler which runs the fio command and posts the result into elast
 This is the user interface which provides the below functionalities to the user 
 
 a)Create virtual machines 
+
 b)List VM 
+
 c)Get Cache Details 
+
 d)View IO stats 
+
 e)Get FIO Results and compare the performance with cache enabled and cache disabled 
+
 f)Get the Host details 
+
 g)Download the SDK 
 
 #SDK
